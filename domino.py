@@ -49,8 +49,15 @@ def read_data(f):
 	GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST = json.load(f)
 	print ("reeded list", FULL_LIST, len(FULL_LIST))
 	
-#def check_bone(board_bone, user_bone):
-#	if board_bone // 10 == user_bone // 10 
+def set_bone(board_bone, user_bone, side, user_list):
+	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST
+
+	if side == 'L':
+		print("board_bone // 10", board_bone // 10)
+		print("user_bone // 10", user_bone // 10)
+
+		if (BOARD_LIST[0] // 10 == user_bone // 10) or (BOARD_LIST[0]  10 == user_bone // 10):
+			BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))
 
 if not os.path.isfile(FILE_NAME):
 	new_game()
@@ -65,10 +72,9 @@ if not GAME_STATUS:
 print (sys.argv)
 
 user_name = sys.argv[1]
-bone_board = int(sys.argv[2])
+board_bone = int(sys.argv[2])
 user_bone =  int(sys.argv[3])
-if 5 == len(sys.argv):
-	side = sys.argv[4]
+side = sys.argv[4]
 
 if user_name == 'user1':
 	user_list = USER_1_LIST
@@ -78,7 +84,7 @@ else:
 	print (user_list)
 
 
-if bone_board == -1:
+if board_bone == -1:
 	#game not began yet, its a first step
 	if user_bone in user_list:
 		BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
