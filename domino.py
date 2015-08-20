@@ -3,8 +3,6 @@ import sys
 import json
 import os.path
 
-#RIGHT_END
-#LEFT_END
 FULL_LIST = []
 USER_1_LIST = []
 USER_2_LIST = []
@@ -15,7 +13,7 @@ GAME_STATUS = []
 
 """
 File format:
-0/1 - game condition (0 - not started, 1 - in progress)
+[]  - game condition (0 - not started, 1 - in progress)
 []  - FULL_LIST
 []	- USER_1_LIST
 []	- USER_2_LIST
@@ -109,7 +107,6 @@ if not GAME_STATUS:
 	exit()
  
 print (sys.argv)
-print (sys.argv)
 
 user_name = sys.argv[1]
 board_bone = int(sys.argv[2])
@@ -118,10 +115,11 @@ user_bone =  int(sys.argv[3])
 
 if user_name == 'user1':
 	user_list = USER_1_LIST
-	print (user_list)
-else:
+elif user_name == 'user2':
 	user_list = USER_2_LIST
-	print (user_list)
+else:
+	print ("Wrong user name")
+	is_ok = False
 
 return_str = ""
 
