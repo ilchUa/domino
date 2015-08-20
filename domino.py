@@ -155,7 +155,7 @@ print("user2:", USER_2_LIST)
 
 status = 'OK'
 return_str = status + return_str
-print(return_str, BOARD_LIST, )
+print(return_str, BOARD_LIST)
 
 #parse args
 """
