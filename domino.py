@@ -36,9 +36,6 @@ def new_game():
 	for i in range(7):
 		USER_2_LIST.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
 
-	with open(FILE_NAME, 'w') as f:
-		write_data(f)	
-
 def write_data(f):
 	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST
 	all = [GAME_STATUS,FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST]
@@ -47,17 +44,59 @@ def write_data(f):
 def read_data(f):
 	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST
 	GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST = json.load(f)
-	print ("reeded list", FULL_LIST, len(FULL_LIST))
-	
-def set_bone(board_bone, user_bone, side, user_list):
+
+def set_bone(board_bone, user_bone, user_list):
 	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST
 
-	if side == 'L':
-		print("board_bone // 10", board_bone // 10)
-		print("user_bone // 10", user_bone // 10)
+	if board_bone in BOARD_LIST:
+		if len(BOARD_LIST) == 1:
+			if (board_bone // 10 ) == (user_bone % 10):
+				BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))	
+				
+			elif (board_bone // 10 ) == (user_bone // 10):
+				rev_user_bone = ((user_bone % 10) * 10 ) + (user_bone//10 )
+				BOARD_LIST.insert(0, rev_user_bone)
+				user_list.remove(user_bone)
 
-		if (BOARD_LIST[0] // 10 == user_bone // 10) or (BOARD_LIST[0]  10 == user_bone // 10):
-			BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))
+			elif (board_bone%10) == (user_bone // 10):
+				BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
+
+			elif (board_bone%10) == (user_bone % 10):
+				rev_user_bone = ((user_bone % 10) * 10 ) + (user_bone//10 )
+				BOARD_LIST.append(rev_user_bone)
+				user_list.remove(user_bone)
+
+		elif 0 == BOARD_LIST.index(board_bone):
+			#check bone
+			if (board_bone // 10 ) == (user_bone % 10):
+				BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))	
+				print("Bone is OK")
+			elif (board_bone // 10 ) == (user_bone // 10):
+				rev_user_bone = ((user_bone % 10) * 10 ) + (user_bone//10 )
+				BOARD_LIST.insert(0, rev_user_bone)
+				user_list.remove(user_bone)			
+			else: 
+				print ("Bone NOT ok")
+
+		elif len(BOARD_LIST) - 1 == BOARD_LIST.index(board_bone):
+			if (board_bone%10) == (user_bone // 10):
+				BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
+			elif(board_bone%10) == (user_bone % 10):
+				rev_user_bone = ((user_bone % 10) * 10 ) + (user_bone//10 )
+				BOARD_LIST.append(rev_user_bone)
+				user_list.remove(user_bone)
+			else:
+				print ("Bone not OK")
+		else:
+			print("Boars bone position is wrong")
+
+
+ 	# if side == 'L':
+ 	# 	print("board_bone // 10", board_bone // 10)
+ 	# 	print("user_bone // 10", user_bone // 10)
+
+ 	# 	if (BOARD_LIST[0] // 10 == user_bone // 10) or (BOARD_LIST[0]  10 == user_bone // 10):
+ 	# 		BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))
 
 if not os.path.isfile(FILE_NAME):
 	new_game()
@@ -70,11 +109,12 @@ if not GAME_STATUS:
 	exit()
  
 print (sys.argv)
+print (sys.argv)
 
 user_name = sys.argv[1]
 board_bone = int(sys.argv[2])
 user_bone =  int(sys.argv[3])
-side = sys.argv[4]
+
 
 if user_name == 'user1':
 	user_list = USER_1_LIST
@@ -83,15 +123,22 @@ else:
 	user_list = USER_2_LIST
 	print (user_list)
 
+return_str = ""
 
-if board_bone == -1:
+if (board_bone < 0) and (user_bone < 0):
+	#game not began yet, we should return user_bone list
+	return_str = str(user_list)
+else:
+	if (board_bone < 0) and ((user_bone >= 0) and (user_bone in user_list)):
 	#game not began yet, its a first step
-	if user_bone in user_list:
 		BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
-		print("BOARD_LIST:", BOARD_LIST)
-		print("user_list:", user_list)
-#else:
-	#check is current step valid
+	elif (board_bone > 0) and ((user_bone >= 0) and (user_bone in user_list)):
+		print("Call set_bone()")
+		set_bone(board_bone, user_bone, user_list)
+	else:
+		print("something goes wrong")
+
+
 
 
 
@@ -100,10 +147,15 @@ if board_bone == -1:
 with open(FILE_NAME, 'w') as f:
 	write_data(f)
 
+print("FULL_LIST:", FULL_LIST)
+print("BOARD_LIST:", BOARD_LIST)
+print("user1:", USER_1_LIST)
+print("user2:", USER_2_LIST)
+
 
 status = 'OK'
-
-print(status, BOARD_LIST)
+return_str = status + return_str
+print(return_str, BOARD_LIST, )
 
 #parse args
 """
