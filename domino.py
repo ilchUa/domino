@@ -6,6 +6,9 @@ import os.path
 FULL_LIST = []
 USER_1_LIST = []
 USER_2_LIST = []
+USER_3_LIST = []
+USER_4_LIST = []
+
 BOARD_LIST = []
 FILE_NAME = 'dominoData'
 FILE_SEPARATOR = '\n'
@@ -20,7 +23,7 @@ File format:
 []	- BOARD_LIST
 """
 def new_game():
-	global FULL_LIST, USER_1_LIST, USER_2_LIST, GAME_STATUS
+	global FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, GAME_STATUS
 
 	GAME_STATUS = [1]
 	for i in range(7):
@@ -33,18 +36,31 @@ def new_game():
 
 	for i in range(7):
 		USER_2_LIST.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
+	
+	for i in range(7):
+		USER_3_LIST.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
+	
+	USER_4_LIST = list(FULL_LIST)	
 
 def write_data(f):
-	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST
-	all = [GAME_STATUS,FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST]
+	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, BOARD_LIST
+	all = [GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, BOARD_LIST]
 	f.write(json.dumps(all))
 
-def read_data(f):
-	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST
-	GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST = json.load(f)
+def read_data():
+	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, BOARD_LIST
+	
+	with open(FILE_NAME, 'r+') as f:
+		GAME_STATUS, \
+		FULL_LIST, \
+		USER_1_LIST, \
+		USER_2_LIST, \
+		USER_3_LIST, \
+		USER_4_LIST, \
+		BOARD_LIST = json.load(f)
 
 def set_bone(board_bone, user_bone, user_list):
-	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, BOARD_LIST
+	global BOARD_LIST
 
 	if board_bone in BOARD_LIST:
 		if len(BOARD_LIST) == 1:
@@ -66,9 +82,11 @@ def set_bone(board_bone, user_bone, user_list):
 
 		elif 0 == BOARD_LIST.index(board_bone):
 			#check bone
+			print("dbg1",board_bone // 10, "==",  (user_bone % 10))
+			print("dbg2",board_bone // 10, "==",  (user_bone // 10))
+
 			if (board_bone // 10 ) == (user_bone % 10):
 				BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))	
-				print("Bone is OK")
 			elif (board_bone // 10 ) == (user_bone // 10):
 				rev_user_bone = ((user_bone % 10) * 10 ) + (user_bone//10 )
 				BOARD_LIST.insert(0, rev_user_bone)
@@ -88,6 +106,13 @@ def set_bone(board_bone, user_bone, user_list):
 		else:
 			print("Boars bone position is wrong")
 
+def finish_step(return_str):
+	#at the end we should save data to file for the next steps
+	with open(FILE_NAME, 'w') as f:
+		write_data(f)
+
+	print(return_str, BOARD_LIST)
+	exit()
 
  	# if side == 'L':
  	# 	print("board_bone // 10", board_bone // 10)
@@ -96,32 +121,40 @@ def set_bone(board_bone, user_bone, user_list):
  	# 	if (BOARD_LIST[0] // 10 == user_bone // 10) or (BOARD_LIST[0]  10 == user_bone // 10):
  	# 		BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))
 
-if not os.path.isfile(FILE_NAME):
-	new_game()
-else:
-	with open(FILE_NAME, 'r+') as f:
-		read_data(f)
-
-if not GAME_STATUS:
-	print("We are NOT in GAME!")
-	exit()
  
-print (sys.argv)
+is_ok = True
 
+user_list = []
+return_str =""
 user_name = sys.argv[1]
 board_bone = int(sys.argv[2])
 user_bone =  int(sys.argv[3])
 
+if user_name == "-1":
+	new_game()	
+	finish_step("OK")
+
+if not os.path.isfile(FILE_NAME):
+	new_game()
+else:
+	read_data()
+
+if not GAME_STATUS:
+	print("Failed")
+	exit()
 
 if user_name == 'user1':
 	user_list = USER_1_LIST
 elif user_name == 'user2':
 	user_list = USER_2_LIST
+elif user_name == 'user3':
+	user_list = USER_3_LIST
+elif user_name == 'user4':
+	user_list = USER_4_LIST	
 else:
 	print ("Wrong user name")
 	is_ok = False
 
-return_str = ""
 
 if (board_bone < 0) and (user_bone < 0):
 	#game not began yet, we should return user_bone list
@@ -130,30 +163,22 @@ else:
 	if (board_bone < 0) and ((user_bone >= 0) and (user_bone in user_list)):
 	#game not began yet, its a first step
 		BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
-	elif (board_bone > 0) and ((user_bone >= 0) and (user_bone in user_list)):
+	elif (board_bone >= 0) and ((user_bone >= 0) and (user_bone in user_list)):
 		print("Call set_bone()")
 		set_bone(board_bone, user_bone, user_list)
 	else:
-		print("something goes wrong")
+		print ("Something wrong")		
+		is_ok = False
 
 
 
-
-
-
-#at the end we should save data to file for the next steps
-with open(FILE_NAME, 'w') as f:
-	write_data(f)
-
-print("FULL_LIST:", FULL_LIST)
-print("BOARD_LIST:", BOARD_LIST)
 print("user1:", USER_1_LIST)
 print("user2:", USER_2_LIST)
+print("user3:", USER_3_LIST)
+print("user4:", USER_4_LIST)
 
-
-status = 'OK'
-return_str = status + return_str
-print(return_str, BOARD_LIST)
+return_str = ("OK" if is_ok else "NOTOK") + return_str
+finish_step(return_str)
 
 #parse args
 """
