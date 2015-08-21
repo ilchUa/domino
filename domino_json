@@ -4,3 +4,6 @@ data = {"status":"OK", "token":"0", "user_name":"Vasya", "step":"active",
               "enemy":[{"name":"John", "count":"7", "step":"passive"},
                        {"name":"Кузнечик", "count":"1", "step":"passive"},
                        {"name":"Larisa", "count":"3", "step":"passive"}]};
+
+
+http://pythonicway.com/education/basics/17-python-json-parse
