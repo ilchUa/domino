@@ -1,0 +1,6 @@
+data = {"status":"OK", "token":"0", "user_name":"Vasya", "step":"active",
+              "board":[{"dom":"00"},{"dom":"01"},{"dom":"11"},{"dom":"16"}],
+              "hand":[{"dom":"33"},{"dom":"45"},{"dom":"63"},{"dom":"22"}],
+              "enemy":[{"name":"John", "count":"7", "step":"passive"},
+                       {"name":"Кузнечик", "count":"1", "step":"passive"},
+                       {"name":"Larisa", "count":"3", "step":"passive"}]};
