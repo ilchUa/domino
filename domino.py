@@ -4,6 +4,7 @@ import json
 import os.path
 
 FULL_LIST = []
+USER_NAME_LIST = []
 USER_1_LIST = []
 USER_2_LIST = []
 USER_3_LIST = []
@@ -43,12 +44,25 @@ def new_game():
 	USER_4_LIST = list(FULL_LIST)	
 
 def write_data(f):
-	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, BOARD_LIST
-	all = [GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, BOARD_LIST]
+	global GAME_STATUS,\
+	FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, \
+	BOARD_LIST, USER_NAME_LIST, \
+	CURRENT_USER_STEP
+
+	all = [
+			GAME_STATUS,\
+			FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, \
+			BOARD_LIST, USER_NAME_LIST, \
+			CURRENT_USER_STEP
+			]
+
 	f.write(json.dumps(all))
 
 def read_data():
-	global GAME_STATUS, FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, BOARD_LIST
+	global GAME_STATUS,\
+	FULL_LIST, USER_1_LIST, USER_2_LIST, USER_3_LIST, USER_4_LIST, \
+	BOARD_LIST, USER_NAME_LIST, \
+	CURRENT_USER_STEP
 	
 	with open(FILE_NAME, 'r+') as f:
 		GAME_STATUS, \
@@ -57,7 +71,9 @@ def read_data():
 		USER_2_LIST, \
 		USER_3_LIST, \
 		USER_4_LIST, \
-		BOARD_LIST = json.load(f)
+		BOARD_LIST, \
+		USER_NAME_LIST, \
+		CURRENT_USER_STEP = json.load(f)		
 
 def set_bone(board_bone, user_bone, user_list):
 	global BOARD_LIST
@@ -121,8 +137,9 @@ def finish_step(return_str):
  	# 	if (BOARD_LIST[0] // 10 == user_bone // 10) or (BOARD_LIST[0]  10 == user_bone // 10):
  	# 		BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))
 
- 
+
 is_ok = True
+if validate
 
 user_list = []
 return_str =""
@@ -130,14 +147,29 @@ user_name = sys.argv[1]
 board_bone = int(sys.argv[2])
 user_bone =  int(sys.argv[3])
 
+#trying to read data form file
+
+if not os.path.isfile(FILE_NAME):
+		new_game()
+	else:
+		read_data()	
+
+
+if len(sys.argv) == 2:
+	#Adding a new user
+	if len(USER_NAME_LIST) > 5:
+		USER_NAME_LIST.append(sys.argv[2])
+		finish_step("OK")
+elif len(sys.argv) == 4:
+	user_list = []
+	return_str =""
+	user_name = sys.argv[1]
+	board_bone = int(sys.argv[2])
+	user_bone =  int(sys.argv[3])
+
 if user_name == "-1":
 	new_game()	
 	finish_step("OK")
-
-if not os.path.isfile(FILE_NAME):
-	new_game()
-else:
-	read_data()
 
 if not GAME_STATUS:
 	print("Failed")
@@ -179,6 +211,8 @@ print("user4:", USER_4_LIST)
 
 return_str = ("OK" if is_ok else "NOTOK") + return_str
 finish_step(return_str)
+
+
 
 #parse args
 """
