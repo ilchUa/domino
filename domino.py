@@ -2,7 +2,7 @@ import random
 import sys
 import json
 import os.path
-
+import pdb
 FULL_LIST = []
 USER_NAME_DICT = {}
 USER_NAME_LIST = []
@@ -94,6 +94,7 @@ def set_bone(board_bone, user_bone, user_list):
 	else:
 		status = "NOTOK"
 
+	return status
 
 def finish_step(return_str):
 	#at the end we should save data to file for the next steps
@@ -111,8 +112,8 @@ def finish_step(return_str):
 
 
 
-def fill_output_data(user_list, user_name, status):
-	global USER_NAME_DICT
+def fill_output_data(user_name, status):
+	global USER_NAME_DICT, USER_STEP
 
 	board_output_list = []
 	hand_output_list = []
@@ -142,13 +143,13 @@ def fill_output_data(user_list, user_name, status):
 
 	#fill board_output_list
 	for bone in BOARD_LIST:
-		board_output_list.append(bone_dict.fromkeys(["dom"], bone))
+		board_output_list.append(bone_dict.fromkeys(["dom"], str(bone)))
 	output_data['board'] = board_output_list
 
 	bone_dict.clear()
 
-	for bone in user_list:
-		hand_output_list.append(bone_dict.fromkeys(["dom"], bone))
+	for bone in USER_NAME_DICT[user_name]:
+		hand_output_list.append(bone_dict.fromkeys(["dom"], str(bone)))
 	output_data['hand'] = hand_output_list
 
 	for name in USER_NAME_DICT.keys():
@@ -156,13 +157,16 @@ def fill_output_data(user_list, user_name, status):
 			pass
 		else:
 			enemy_dict['name'] = name
-			enemy_dict['count'] = len(USER_NAME_DICT[name])
+			enemy_dict['count'] = str(len(USER_NAME_DICT[name]))
 			enemy_dict['step'] = ("Active" if USER_STEP == name else "Passive")
 			enemy_output_list.append(enemy_dict.copy())
 			enemy_dict.clear()
 
-	print("output_data:")
+
+
+	#print("output_data:")
 	print (json.dumps(output_data, indent=4))
+	#print(output_data['status'])
 
 def validate_params(params_list):
 	global USER_NAME_DICT, BOARD_LIST
@@ -185,6 +189,7 @@ def validate_params(params_list):
 		board_bone = int(sys.argv[2])
 		user_bone =  int(sys.argv[3])
 
+
 		if len(USER_NAME_DICT) > 4:
 			print ("Waiting till more users ")
 			return "NOTOK"
@@ -193,9 +198,11 @@ def validate_params(params_list):
 			if (board_bone != -1 ):
 				print("At first step board bone should be equal to -1 ")
 				return "NOTOK"
-		else:
-			if board_bone not in BOARD_LIST:
+		elif board_bone not in BOARD_LIST:
 				print("Wrong board bone")
+				return "NOTOK"
+		elif USER_STEP != user_name:
+				print("Currently user ", USER_STEP, "on go")
 				return "NOTOK"
 	
 		if user_bone not in USER_NAME_DICT[user_name]:
@@ -204,7 +211,85 @@ def validate_params(params_list):
 
 	return "OK"
 
-is_ok = True
+#def final_output(user_name):
+
+		#the game is FINISHED
+
+def check_bone_for_nxt_step(board_bone, user_name):
+	step_posible = False
+	for user_bone in USER_NAME_DICT[user_name]:
+		if len(BOARD_LIST) == 1:
+			if (board_bone // 10 ) == (user_bone % 10):
+				step_posible = True
+				break
+				
+			elif (board_bone // 10 ) == (user_bone // 10):				
+				step_posible = True
+				break
+
+			elif (board_bone%10) == (user_bone // 10):
+				step_posible = True
+				break
+
+			elif (board_bone%10) == (user_bone % 10):
+				step_posible = True
+				break
+
+		elif 0 == BOARD_LIST.index(board_bone):
+			if (board_bone // 10 ) == (user_bone % 10):
+				step_posible = True
+				break
+
+			elif (board_bone // 10 ) == (user_bone // 10):
+				step_posible = True
+				break
+
+			else: 
+				step_posible = False
+
+		elif len(BOARD_LIST) - 1 == BOARD_LIST.index(board_bone):
+			if (board_bone%10) == (user_bone // 10):
+				step_posible = True
+				break
+
+			elif(board_bone%10) == (user_bone % 10):
+				step_posible = True
+				break
+
+			else:
+				step_posible = False
+		else:
+			step_posible = False
+
+	return step_posible
+
+
+def choose_next_user(user_name, next_user):
+	global USER_STEP
+
+	step_posible = False
+	next_user = USER_NAME_LIST[(USER_NAME_LIST.index(user_name) + 1)%4]	
+
+	while next_user != user_name:
+		if len(BOARD_LIST) == 1:
+			if check_bone_for_nxt_step(BOARD_LIST[0], next_user):
+				step_posible = True
+				break	
+		elif check_bone_for_nxt_step(BOARD_LIST[0], next_user) or \
+			check_bone_for_nxt_step(BOARD_LIST[-1], next_user):
+			step_posible = True
+			break
+
+		next_user = USER_NAME_LIST[(USER_NAME_LIST.index(next_user) + 1)%4]	
+	else:
+		pass
+
+	if step_posible:
+		USER_STEP = next_user
+
+	return ("OK" if step_posible == True else "NOTOK")
+
+
 user_list = []
 status =""
 
@@ -224,6 +309,8 @@ else:
 
 status = validate_params(sys.argv)
 if status == "NOTOK":
+	user_name = sys.argv[1]
+	fill_output_data(user_name, status)
 	finish_step(status)
 
 if len(sys.argv) == 2:
@@ -245,27 +332,39 @@ elif len(sys.argv) == 4:
 	user_bone =  int(sys.argv[3])
 	#main game func
 
-	if USER_STEP == "" and len(BOARD_LIST) == 0:	
-		user_list = USER_NAME_DICT.get(user_name)
+	user_list = USER_NAME_DICT.get(user_name)
+	if USER_STEP == "" and len(BOARD_LIST) == 0:			
 		if user_bone == 11:
 			#if (board_bone < 0) and ((user_bone >= 0) and (user_bone in user_list)):
 			#game not began yet, its a first step
 				#if user_bone 
+			#USER_STEP = user_name			
 			BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
 		else:
 			print ("Only 1:1 can start the game")
 			status = "NOTOK"
-	elif USER_STEP == user_name:
-		
-		status = set_bone(board_bone, user_bone, user_list)
-		# USER_STEP = [(USER_NAME_LIST.index(USER_STEP) + 1)%4]
+	elif USER_STEP == user_name:	
+		status = set_bone(board_bone, user_bone, user_list)		
 	else:
-		print("Currently user ", USER_STEP, "on in action")
+		status = "NOTOK"
+		print("Currently user ", USER_STEP, "on go")
 
+	if status == "OK":
+		if len(USER_NAME_DICT[user_name]) == 0:
+			final_output(user_name)
 		
+		#choose next user
+		next_user = ""
+		status = choose_next_user(user_name, next_user)
+		
+		# print ("next_user", USER_STEP)
+		# print ("current user", user_name)
 
-fill_output_data(user_list, user_name, status)
+		#USER_STEP = next_user
+
+fill_output_data(user_name, status)
 return_str = status
+
 finish_step(return_str)
 
 
