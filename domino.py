@@ -213,9 +213,6 @@ def validate_params(params_list):
 
 	return "OK"
 
-#def final_output(user_name):
-
-		#the game is FINISHED
 
 def check_bone_for_nxt_step(board_bone, user_name):
 	step_posible = False
@@ -294,36 +291,51 @@ def choose_next_user(user_name, next_user):
 
 
 
-# def main_game(para):
+def main_game(params):
 
-# 	status = validate_params(sys.argv)
+	if len(params) != 6 :
+		print("Wrong number of parameters")
+		return "NOTOK", ""
 
-# 	if state == "entry":
-# 		#adding new user
+	state, token, pname, gname, bb, hb = params
 
-# 		user_list = []
+	if not os.path.isfile(FILE_NAME):
+		new_game()
+	else:
+		read_data()
 
-# 		if not os.path.isfile(FILE_NAME):
-# 			new_game()
-# 		else:
-# 			read_data()
+	#add new user
+	if state == "entry":
 
-# 		for i in range(7):
-# 			user_list.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
 
-# 		user_dict = {
-# 			"state":"",
-# 			"hand":user_list
-# 				}
-# 		user_dict['state'] = state
+		#check do we have this user added prev.
+		if pname in USER_NAME_LIST:
+			print("We already have this user")
+			status = "NOTOK"
+		elif len(USER_NAME_LIST) >= 4:
+			print ("We already have 4 users")
+			status = "NOTOK"
+		else:
+			user_list = []
 
-# 		USER_NAME_DICT[pname] = user_dict
-# 		USER_NAME_LIST.append(pname)
+			for i in range(7):
+				user_list.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
 
-# 		finish_step("")	
-# 		print(USER_NAME_DICT)
+			user_dict = {
+				"state":"",
+				"hand":user_list
+					}
+			user_dict['state'] = state
 
-# 	return state, "sdfghj"
+			USER_NAME_DICT[pname] = user_dict
+			USER_NAME_LIST.append(pname)
+
+
+	print(USER_NAME_DICT)
+
+	finish_step("")	
+
+	return state, "sdfghj"
 
 
 
