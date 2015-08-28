@@ -11,6 +11,8 @@ FILE_NAME = 'dominoData'
 FILE_SEPARATOR = '\n'
 GAME_STATUS = []
 USER_STEP = ""
+JSON_OUTPUT = ""
+GAME_NAME = ""
 
 def new_game():
 	global GAME_STATUS,\
@@ -25,14 +27,17 @@ def write_data(f):
 	FULL_LIST, \
 	BOARD_LIST, USER_NAME_LIST, \
 	USER_NAME_DICT, \
-	USER_STEP
+	USER_STEP, \
+	GAME_NAME
+
 
 	all = [
 			GAME_STATUS,\
 			FULL_LIST, \
 			BOARD_LIST, USER_NAME_LIST, \
 			USER_NAME_DICT, \
-			USER_STEP
+			USER_STEP, \
+			GAME_NAME
 			]
 
 	f.write(json.dumps(all))
@@ -41,7 +46,8 @@ def read_data():
 	global GAME_STATUS,\
 	FULL_LIST, BOARD_LIST, USER_NAME_LIST, \
 	USER_NAME_DICT, \
-	USER_STEP
+	USER_STEP, \
+	GAME_NAME
 	
 	with open(FILE_NAME, 'r+') as f:
 		GAME_STATUS, \
@@ -49,7 +55,8 @@ def read_data():
 		BOARD_LIST, \
 		USER_NAME_LIST, \
 		USER_NAME_DICT, \
-		USER_STEP = json.load(f)		
+		USER_STEP , \
+		GAME_NAME = json.load(f)		
 
 def set_bone(board_bone, user_bone, user_list):
 	global BOARD_LIST
@@ -103,17 +110,9 @@ def finish_step(return_str):
 
 	exit()
 
- 	# if side == 'L':
- 	# 	print("board_bone // 10", board_bone // 10)
- 	# 	print("user_bone // 10", user_bone // 10)
-
- 	# 	if (BOARD_LIST[0] // 10 == user_bone // 10) or (BOARD_LIST[0]  10 == user_bone // 10):
- 	# 		BOARD_LIST.insert(0, user_list.pop(user_list.index(user_bone)))
-
-
 
 def fill_output_data(user_name, status):
-	global USER_NAME_DICT, USER_STEP
+	global USER_NAME_DICT, USER_STEP, JSON_OUTPUT
 
 	board_output_list = []
 	hand_output_list = []
@@ -128,6 +127,7 @@ def fill_output_data(user_name, status):
 	#OUtput structure :
 	output_data = {
 		"status":"",
+		"state":"",
 		"token":"0",
 		"user_name":"",
 		"step":"",
@@ -162,11 +162,9 @@ def fill_output_data(user_name, status):
 			enemy_output_list.append(enemy_dict.copy())
 			enemy_dict.clear()
 
+	JSON_OUTPUT = json.dumps(output_data, indent=4)	
+	print (JSON_OUTPUT)
 
-
-	#print("output_data:")
-	print (json.dumps(output_data, indent=4))
-	#print(output_data['status'])
 
 def validate_params(params_list):
 	global USER_NAME_DICT, BOARD_LIST
@@ -185,9 +183,9 @@ def validate_params(params_list):
 			return "NOTOK"
 	
 	elif len(params_list) == 4:
-		user_name = sys.argv[1]
-		board_bone = int(sys.argv[2])
-		user_bone =  int(sys.argv[3])
+		user_name = params_list[1]
+		board_bone = int(params_list[2])
+		user_bone =  int(params_list[3])
 
 
 		if len(USER_NAME_DICT) > 4:
@@ -290,96 +288,101 @@ def choose_next_user(user_name, next_user):
 	return ("OK" if step_posible == True else "NOTOK")
 
 
-user_list = []
-status =""
 
-# if validate
 
-# user_list = []
-# user_name = sys.argv[1]
-# board_bone = int(sys.argv[2])
-# user_bone =  int(sys.argv[3])
+# def main_game(para):
 
-#trying to read data form file
+# 	status = validate_params(sys.argv)
 
-if not os.path.isfile(FILE_NAME):
-	new_game()
-else:
-	read_data()
+# 	if state == "entry":
+# 		#adding new user
 
-status = validate_params(sys.argv)
-if status == "NOTOK":
-	user_name = sys.argv[1]
-	fill_output_data(user_name, status)
-	finish_step(status)
+# 		user_list = []
 
-if len(sys.argv) == 2:
-	#Adding a new user
-	user_list = [] 
-	user_name = sys.argv[1]
+# 		if not os.path.isfile(FILE_NAME):
+# 			new_game()
+# 		else:
+# 			read_data()
 
-	for i in range(7):
-		user_list.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
+# 		for i in range(7):
+# 			user_list.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
 
-	USER_NAME_DICT[user_name] = user_list
-	USER_NAME_LIST.append(user_name)
-	status = "OK"	
-	
-elif len(sys.argv) == 4:
+# 		user_dict = {
+# 			"state":"",
+# 			"hand":user_list
+# 				}
+# 		user_dict['state'] = state
 
-	user_name = sys.argv[1]
-	board_bone = int(sys.argv[2])
-	user_bone =  int(sys.argv[3])
-	#main game func
+# 		USER_NAME_DICT[pname] = user_dict
+# 		USER_NAME_LIST.append(pname)
 
-	user_list = USER_NAME_DICT.get(user_name)
-	if USER_STEP == "" and len(BOARD_LIST) == 0:			
-		if user_bone == 11:
-			#if (board_bone < 0) and ((user_bone >= 0) and (user_bone in user_list)):
-			#game not began yet, its a first step
-				#if user_bone 
-			#USER_STEP = user_name			
-			BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
-		else:
-			print ("Only 1:1 can start the game")
-			status = "NOTOK"
-	elif USER_STEP == user_name:	
-		status = set_bone(board_bone, user_bone, user_list)		
+# 		finish_step("")	
+# 		print(USER_NAME_DICT)
+
+# 	return state, "sdfghj"
+
+
+
+if __name__ == "__main__":
+	user_list = []
+	status =""
+
+	#trying to read data form file
+	if not os.path.isfile(FILE_NAME):
+		new_game()
 	else:
-		status = "NOTOK"
-		print("Currently user ", USER_STEP, "on go")
+		read_data()
 
-	if status == "OK":
-		if len(USER_NAME_DICT[user_name]) == 0:
-			final_output(user_name)
+	status = validate_params(sys.argv)
+	if status == "NOTOK":
+		user_name = sys.argv[1]
+		fill_output_data(user_name, status)
+		finish_step(status)
+
+	if len(sys.argv) == 2:
+		#Adding a new user
+		user_list = [] 
+		user_name = sys.argv[1]
+
+		for i in range(7):
+			user_list.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
+
+		USER_NAME_DICT[user_name] = user_list
+		USER_NAME_LIST.append(user_name)
+		status = "OK"	
 		
-		#choose next user
-		next_user = ""
-		status = choose_next_user(user_name, next_user)
-		
-		# print ("next_user", USER_STEP)
-		# print ("current user", user_name)
+	elif len(sys.argv) == 4:
 
-		#USER_STEP = next_user
+		user_name = sys.argv[1]
+		board_bone = int(sys.argv[2])
+		user_bone =  int(sys.argv[3])
+		#main game func
 
-fill_output_data(user_name, status)
-return_str = status
+		user_list = USER_NAME_DICT.get(user_name)
+		if USER_STEP == "" and len(BOARD_LIST) == 0:			
+			if user_bone == 11:	
+				BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
+			else:
+				print ("Only 1:1 can start the game")
+				status = "NOTOK"
+		elif USER_STEP == user_name:	
+			status = set_bone(board_bone, user_bone, user_list)		
+		else:
+			status = "NOTOK"
+			print("Currently user ", USER_STEP, "on go")
 
-finish_step(return_str)
+		if status == "OK":
+			if len(USER_NAME_DICT[user_name]) == 0:
+				final_output(user_name)
+			
+			#choose next user
+			next_user = ""
+			status = choose_next_user(user_name, next_user)
+			
+
+	fill_output_data(user_name, status)
+	return_str = status
+
+	finish_step(return_str)
 
 
-
-#parse args
-"""
-args format:
-user_name bone_on_a_board user_bone
-"""
-
-
-
-
-
-"""f = open('domiData', 'r+b')
-if f in None:
-	print("No file exist")
-"""
