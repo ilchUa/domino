@@ -1,8 +1,12 @@
+#!/usr/bin/env python3
+
 import random
 import sys
 import json
 import os.path
 import pdb
+
+
 FULL_LIST = []
 USER_NAME_DICT = {}
 USER_NAME_LIST = []
