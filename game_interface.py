@@ -24,7 +24,7 @@ def get_game_data(state, token, pname, gname, bb, hb):
 	return state, json_out
 
 #pdb.set_trace()
-state, json_out = get_game_data("entry","",sys.argv[1], "gam1", "12", "11")
+state, json_out = get_game_data(sys.argv[2],"",sys.argv[1], "gam1", sys.argv[3], sys.argv[4])
 print(state, json_out)
 
 

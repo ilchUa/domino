@@ -297,7 +297,11 @@ def main_game(params):
 		print("Wrong number of parameters")
 		return "NOTOK", ""
 
-	state, token, pname, gname, bb, hb = params
+	state, token, pname, gname, board_bone, user_bone = params
+
+	board_bone = int(board_bone)
+	user_bone = int(user_bone)
+
 
 	if not os.path.isfile(FILE_NAME):
 		new_game()
@@ -306,7 +310,6 @@ def main_game(params):
 
 	#add new user
 	if state == "entry":
-
 
 		#check do we have this user added prev.
 		if pname in USER_NAME_LIST:
@@ -322,21 +325,43 @@ def main_game(params):
 				user_list.append(FULL_LIST.pop(random.randrange(0,len(FULL_LIST))))
 
 			user_dict = {
-				"state":"",
+				"state":"wait",
 				"hand":user_list
 					}
-			user_dict['state'] = state
 
 			USER_NAME_DICT[pname] = user_dict
 			USER_NAME_LIST.append(pname)
+	elif state == "wait":
+		#
+		pass
 
+	elif state == "playboard":
+
+		user_gict = USER_NAME_DICT.get(pname)
+		user_list = user_gict['hand']
+		print (user_list)
+		if USER_STEP == "" and len(BOARD_LIST) == 0:			
+			if user_bone == 11:	
+				BOARD_LIST.append(user_list.pop(user_list.index(user_bone)))
+			else:
+				print ("Only 1:1 can start the game")
+				status = "NOTOK"
+		elif USER_STEP == user_name:	
+			status = set_bone(board_bone, user_bone, user_list)		
+		else:
+			status = "NOTOK"
+			print("Currently user ", USER_STEP, "on go")
+
+		# if status == "OK":
+		# 	if len(USER_NAME_DICT[user_name]) == 0:
+		# 		final_output(user_name)
+			
 
 	print(USER_NAME_DICT)
 
 	finish_step("")	
 
 	return state, "sdfghj"
-
 
 
 if __name__ == "__main__":
